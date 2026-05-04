@@ -18,18 +18,22 @@ jobs:
 
       - name: Run LocalStack
         run: |
-          docker run -d -p 4566:4566 \
-          -e SERVICES=s3 \
-          localstack/localstack:latest
+          docker run -d --name localstack \
+            -p 4566:4566 \
+            -e SERVICES=s3 \
+            -e AWS_DEFAULT_REGION=us-east-1 \
+            -e GATEWAY_LISTEN=0.0.0.0:4566 \
+            localstack/localstack:3.8.1
 
       - name: Wait for LocalStack
         run: |
-          for i in {1..30}; do
-            if curl -s http://localhost:4566/_localstack/health; then
+          for i in {1..60}; do
+            if curl -s http://127.0.0.1:4566/_localstack/health; then
               echo "LocalStack is ready"
               exit 0
             fi
             echo "Waiting for LocalStack..."
+            docker logs --tail 20 localstack || true
             sleep 5
           done
           docker logs localstack
