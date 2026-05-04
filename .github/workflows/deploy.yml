@@ -10,21 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Descargar repositorio
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Instalar Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
 
-      - name: Levantar LocalStack
+      - name: Run LocalStack
         run: |
-          docker run -d --name localstack \
-            -p 4566:4566 \
-            -e SERVICES=s3 \
-            -e DEFAULT_REGION=us-east-1 \
-            localstack/localstack:latest
+          docker run -d -p 4566:4566 \
+          -e SERVICES=s3 \
+          localstack/localstack:latest
 
-      - name: Esperar LocalStack
+      - name: Wait for LocalStack
         run: |
           sleep 15
           curl http://localhost:4566/_localstack/health
