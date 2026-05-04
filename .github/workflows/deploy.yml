@@ -9,15 +9,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    services:
-      localstack:
-        image: localstack/localstack:latest
-        ports:
-          - 4566:4566
-        env:
-          SERVICES: s3
-          DEFAULT_REGION: us-east-1
-
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
@@ -25,9 +16,17 @@ jobs:
       - name: Instalar Terraform
         uses: hashicorp/setup-terraform@v4
 
+      - name: Levantar LocalStack
+        run: |
+          docker run -d --name localstack \
+            -p 4566:4566 \
+            -e SERVICES=s3 \
+            -e DEFAULT_REGION=us-east-1 \
+            localstack/localstack:latest
+
       - name: Esperar LocalStack
         run: |
-          sleep 10
+          sleep 15
           curl http://localhost:4566/_localstack/health
 
       - name: Terraform Init
